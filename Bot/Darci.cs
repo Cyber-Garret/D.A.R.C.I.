@@ -14,17 +14,17 @@ using Microsoft.Extensions.Options;
 
 namespace Bot
 {
-	public class Neira : BackgroundService
+	public class Darci : BackgroundService
 	{
 		private readonly IServiceProvider _service;
-		private readonly ILogger<Neira> _logger;
+		private readonly ILogger<Darci> _logger;
 		private readonly DiscordSocketClient _discord;
 		private readonly BotConfig _config;
 
-		public Neira(IServiceProvider service)
+		public Darci(IServiceProvider service)
 		{
 			_service = service;
-			_logger = service.GetRequiredService<ILogger<Neira>>();
+			_logger = service.GetRequiredService<ILogger<Darci>>();
 			_discord = service.GetRequiredService<DiscordSocketClient>();
 			_config = service.GetRequiredService<IOptions<BotConfig>>().Value;
 		}

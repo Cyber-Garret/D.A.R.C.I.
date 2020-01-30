@@ -32,7 +32,7 @@ namespace Bot
 					services.Configure<BotConfig>(options => hostContext.Configuration.GetSection("BotConfig").Bind(options));
 
 					// Bot services
-					services.AddHostedService<Neira>();
+					services.AddHostedService<Darci>();
 
 					services.AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
 					{
