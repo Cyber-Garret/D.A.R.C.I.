@@ -1,0 +1,14 @@
+{
+	"Name": "Цербер+1",
+	"Type": "Кинетический автомат",
+	"IconUrl": "https://bungie.net/common/destiny2_content/icons/597a6c330d36a31c5d79b9d99c7a00a4.jpg",
+	"ImageUrl": "https://bungie.net/common/destiny2_content/screenshots/1541131350.jpg",
+	"Description": "\"Три головы хорошо, а четыре лучше!\" — Джеза Верлейн по прозвищу \"Сорвиголова\"",
+	"Perk": "Четырехглавый пес",
+	"PerkDescription": "Стреляет из четырех дул сразу.",
+	"SecondPerk": "Комплект для кучной стрельбы",
+	"SecondPerkDescription": "Прицеливание повышает кучность стрельбы этого оружия.",
+	"DropLocation": "Экзотические энграммы, редкие выпадения в открытом мире.",
+	"isWeapon": true,
+	"isHaveCatalyst": true
+}

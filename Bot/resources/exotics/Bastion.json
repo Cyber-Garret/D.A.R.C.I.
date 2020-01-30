@@ -1,0 +1,14 @@
+{
+	"Name": "Бастион",
+	"Type": "Кинетическая плазменная винтовка",
+	"IconUrl": "https://bungie.net/common/destiny2_content/icons/a9fc1dcd792b46c6ef8c77f5fda7f934.jpg",
+	"ImageUrl": "https://bungie.net/common/destiny2_content/screenshots/2415517654.jpg",
+	"Description": "«Там, где ступила моя нога, я буду стоять насмерть. И ни шагу назад», – Сэйнт-14",
+	"Perk": "Кулаки Сэйнта",
+	"PerkDescription": "Заряд из 3 очередей кинетических снарядов.",
+	"SecondPerk": "Рывок",
+	"SecondPerkDescription": "Часть урона, наносимого этим оружием, проникает сквозь стихийные щиты.",
+	"DropLocation": "Экзотическое поручение от Сэйнт-14.",
+	"isWeapon": true,
+	"isHaveCatalyst": false
+}
