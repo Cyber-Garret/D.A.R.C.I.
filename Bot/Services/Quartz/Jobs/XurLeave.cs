@@ -19,7 +19,7 @@ namespace Bot.Services.Quartz.Jobs
 	{
 		private readonly ILogger _logger;
 		private readonly DiscordSocketClient _discord;
-		internal XurLeave(IServiceProvider service)
+		public XurLeave(IServiceProvider service)
 		{
 			_logger = service.GetRequiredService<ILogger<XurArrive>>();
 			_discord = service.GetRequiredService<DiscordSocketClient>();

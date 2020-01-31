@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 namespace Bot.Services.Quartz.Jobs
 {
 	[DisallowConcurrentExecution]
-	internal class XurArrive : IJob
+	public class XurArrive : IJob
 	{
 		private readonly ILogger _logger;
 		private readonly DiscordSocketClient _discord;
-		internal XurArrive(IServiceProvider service)
+		public XurArrive(IServiceProvider service)
 		{
 			_logger = service.GetRequiredService<ILogger<XurArrive>>();
 			_discord = service.GetRequiredService<DiscordSocketClient>();
