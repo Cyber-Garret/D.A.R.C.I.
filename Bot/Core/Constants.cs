@@ -12,5 +12,6 @@ namespace Bot.Core
 		internal const string CatalystFolder = "catalysts";
 
 		internal const string InvisibleString = "\u200b";
+		internal const string Docs = "https://docs.darci.bot/";
 	}
 }

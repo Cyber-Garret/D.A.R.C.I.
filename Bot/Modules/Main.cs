@@ -19,18 +19,16 @@ namespace Bot.Modules
 		private readonly Discord.WebSocket.DiscordSocketClient _discord;
 		private readonly CommandService _command;
 		private readonly Entity.BotConfig _config;
-		public Main(IServiceProvider service)
+		public Main(CommandService command, IServiceProvider service)
 		{
 			_discord = service.GetRequiredService<Discord.WebSocket.DiscordSocketClient>();
-			_command = service.GetRequiredService<CommandService>();
+			_command = command;
 			_config = service.GetRequiredService<IOptions<Entity.BotConfig>>().Value;
 		}
-		[Command("справка")]
-		[Summary("Основная справочная команда.")]
+		[Command("help")]
+		[Summary("Provides list of available commands.")]
 		public async Task MainHelp()
 		{
-			var app = await _discord.GetApplicationInfoAsync();
-
 			var mainCommands = string.Empty;
 			var adminCommands = string.Empty;
 			var economyCommands = string.Empty;
@@ -50,29 +48,67 @@ namespace Bot.Modules
 			}
 
 			var embed = new EmbedBuilder()
-				.WithColor(Color.Gold)
-				.WithTitle($"Доброго времени суток. Меня зовут Нейроматрица, я ИИ \"Черного исхода\" адаптированный для Discord. Успешно функционирую с {app.CreatedAt.ToString("dd.MM.yyyy")}")
+				.WithColor(Color.Green)
+				.WithTitle("Thank you for using the Data Analysis, Reconnaissance, and Cooperative Intelligence bot. You may call me Darci.")
 				.WithDescription(
-				"Моя основная цель - своевременно сообщать когда прибывает или улетает посланник девяти Зур.\n" +
-				"Также я могу предоставить информацию о экзотическом снаряжении,катализаторах.\n" +
-				"Больше информации ты можешь найти в моей [группе ВК](https://vk.com/failsafe_bot)\n" +
-				"и в [документации](https://docs.neira.su/)")
-				.AddField("Основные команды", mainCommands[0..^2])
-				.AddField("Команды администраторов сервера", adminCommands[0..^2])
-				.AddField("Команды экономики и репутации", economyCommands[0..^2])
-				.AddField("Команды настройки Автороли", selfRoleCommands[0..^2]);
+				"Good day. My main target is push message if Xur arrive in solar system.\n" +
+				"I can also provide information about exotic equipment and catalysts.\n" +
+				$"[More info in online Docs]({Constants.Docs})");
+
+			embed.AddField("Main commands", mainCommands[0..^2]);
+			//embed.AddField("Admin commands", adminCommands[0..^2]);
+			//embed.AddField("Self-Role commands", selfRoleCommands[0..^2]);
 
 			await ReplyAsync(embed: embed.Build());
 		}
 
-		[Command("экзот")]
-		[Summary("Отображает информацию о экзотическом снаряжении. Ищет как по полному названию, так и частичному.")]
-		[Remarks("Пример: !экзот буря")]
+		[Command("info")]
+		[Summary("Provides a full info about command.")]
+		[Remarks("Ex: !info <command>, like !info exotic")]
+		public async Task Info([Remainder] string searchCommand = null)
+		{
+			if (searchCommand == null)
+			{
+				await ReplyAndDeleteAsync(":x: Please enter in full or in part the name of the command about which you want help.");
+				return;
+			}
+			var command = _command.Commands.Where(c => c.Name.IndexOf(searchCommand, StringComparison.CurrentCultureIgnoreCase) != -1).FirstOrDefault();
+			if (command == null)
+			{
+				await ReplyAndDeleteAsync($":x: Not found any info about **{searchCommand}**. ");
+				return;
+			}
+			var embed = new EmbedBuilder();
+
+			embed.WithAuthor(_discord.CurrentUser);
+			embed.WithTitle($"Info about command: {command.Name}");
+			embed.WithColor(Color.Gold);
+			embed.WithDescription(command.Summary ?? "No description.");
+			// First alias always command atribute
+			if (command.Aliases.Count > 1)
+			{
+				string alias = string.Empty;
+				//Skip command attribute
+				foreach (var item in command.Aliases.Skip(1))
+				{
+					alias += $"{_config.Prefix}{item}, ";
+				}
+				embed.AddField("Command alias:", alias[0..^2]);
+			}
+			if (command.Remarks != null)
+				embed.AddField("Remark:", command.Remarks);
+
+			await ReplyAsync(embed: embed.Build());
+		}
+
+		[Command("exotic")]
+		[Summary("Provide information about exotic gear. Can search by partial and full name")]
+		[Remarks("Ex: !exotic sturm")]
 		public async Task FindExotic([Remainder] string Input = null)
 		{
 			if (Input == null)
 			{
-				await ReplyAndDeleteAsync(":x: Пожалуйста, введите полное или частичное название экзотического снаряжения.");
+				await ReplyAndDeleteAsync(":x: Please enter the full or partial name of the exotic equipment.");
 				return;
 			}
 
@@ -80,11 +116,92 @@ namespace Bot.Modules
 
 			if (exotic == null)
 			{
-				await ReplyAndDeleteAsync(":x: Этой информации в моей базе данных нет.");
+				await ReplyAndDeleteAsync(":x: Sorry i don't know about this equipment.");
 				return;
 			}
 
-			await ReplyAsync($"Итак, {Context.User.Username}, вот что мне известно про это снаряжение.", embed: Embeds.BuildedExotic(exotic));
+			await ReplyAsync($"So, {Context.User.Username} this is what i know about this equipment.", embed: Embeds.BuildedExotic(exotic));
+		}
+
+		[Command("raid")]
+		[Summary("Command for announcing raid, for register clan mates with inline reaction.")]
+		[Remarks("!raid <name> <reserved place> <time> <memo(can be empty)>\nEx: !raid lw 03.02.20.00 ")]
+		public async Task GoRaid(string milestoneName, int reserved, string raidTime, [Remainder]string leaderMemo = null)
+		{
+			try
+			{
+				
+
+				var milestone = await DatabaseHelper.GetMilestoneAsync(milestoneName);
+
+				if (milestone == null)
+				{
+					var AvailableRaids = "Доступные для регистрации активности:\n\n";
+					var info = DatabaseHelper.GetAllMilestones();
+
+					foreach (var item in info)
+					{
+						AvailableRaids += $"**{item.Name}** или просто **{item.Alias}**\n";
+					}
+
+					var message = new EmbedBuilder()
+						.WithTitle("Страж, я не разобрала в какую активность ты хочешь пойти")
+						.WithColor(Color.Red)
+						.WithDescription(AvailableRaids += "\nПример: !сбор пж")
+						.WithFooter("Хочу напомнить, что я ищу как по полному названию рейда так и частичному. Это сообщение будет автоматически удалено через 2 минуты.");
+					await ReplyAndDeleteAsync(null, embed: message.Build(), timeout: TimeSpan.FromMinutes(2));
+					return;
+				}
+
+				string[] formats = { "dd.MM-HH:mm", "dd,MM-HH,mm", "dd.MM.HH.mm", "dd,MM,HH,mm" };
+
+				DateTime.TryParseExact(raidTime, formats, CultureInfo.InstalledUICulture, DateTimeStyles.None, out DateTime dateTime);
+
+				if (dateTime == new DateTime())
+				{
+					var message = new EmbedBuilder()
+						.WithTitle("Страж, ты указал неизвестный мне формат времени")
+						.WithColor(Color.Gold)
+						.AddField("Я понимаю время начала рейда в таком формате",
+						"Формат времени: **<день>.<месяц>-<час>:<минута>**\n" +
+						"**День:** от 01 до 31\n" +
+						"**Месяц:** от 01 до 12\n" +
+						"**Час:** от 00 до 23\n" +
+						"**Минута:** от 00 до 59\n" +
+						"В итоге у тебя должно получиться: **05.07-20:05** Пример: !сбор пж 21.05-20:00")
+						.AddField("Уведомление", "Время начала активности учитывается только по московскому времени. Также за 15 минут до начала активности, я уведомлю участников личным сообщением.")
+						.WithFooter("Это сообщение будет автоматически удалено через 2 минуты.");
+					await ReplyAndDeleteAsync(null, embed: message.Build(), timeout: TimeSpan.FromMinutes(2));
+					return;
+				}
+				if (dateTime < DateTime.Now)
+				{
+					var message = new EmbedBuilder()
+						.WithColor(Color.Red)
+						.WithDescription($"Собрался в прошлое? Тебя ждет увлекательное шоу \"остаться в живых\" в исполнении моей команды Золотого Века. Не забудь попкорн\nБип...Удачи и передай привет моему капитану.");
+					await ReplyAndDeleteAsync(null, embed: message.Build());
+					return;
+				}
+
+				var msg = await ReplyAsync(message: GuildConfig.settings.GlobalMention, embed: EmbedsHelper.MilestoneNew(Context.User, milestone, dateTime, MilestoneType.Default, userMemo, _customEmote.Raid));
+				await _milestone.RegisterMilestoneAsync(msg.Id, Context, dateTime, MilestoneType.Default, milestone.Id, userMemo);
+
+				//Slots
+				await msg.AddReactionAsync(_customEmote.Raid);
+			}
+			catch (Exception ex)
+			{
+				//reply to user if any error
+				await ReplyAndDeleteAsync("Страж, произошла критическая ошибка, я не могу в данный момент выполнить команду.\nУже пишу моему создателю, он сейчас все поправит.");
+				//Get App info 
+				var app = await _discord.GetApplicationInfoAsync();
+				//Get Owner for DM
+				var owner = await app.Owner.GetOrCreateDMChannelAsync();
+				//Send DM message with exception
+				await owner.SendMessageAsync($"Капитан, проблема с командой сбор! **{ex.Message}** больше подробностей в консоли.");
+				//Log full exception in console
+				_logger.LogCritical(ex, "Milestone command");
+			}
 		}
 	}
 }

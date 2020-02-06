@@ -14,5 +14,9 @@
 		/// Prefix for bot commands
 		/// </summary>
 		public string Prefix { get; set; } = "!";
+		/// <summary>
+		/// Xur arrive and leave hour(0-24 format) for push message.
+		/// </summary>
+		public int XurHour { get; set; } = 20;
 	}
 }
