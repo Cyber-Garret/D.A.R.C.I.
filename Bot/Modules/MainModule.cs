@@ -1,7 +1,10 @@
 ﻿using Bot.Core;
+using Bot.Entity;
+using Bot.Entity.Milestone;
 using Bot.Helpers;
 
 using Discord;
+using Discord.WebSocket;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 
@@ -11,19 +14,26 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Bot.Services.Storage;
+using System.Globalization;
+using Microsoft.Extensions.Logging;
 
 namespace Bot.Modules
 {
-	public class Main : InteractiveBase
+	public class MainModule : InteractiveBase
 	{
-		private readonly Discord.WebSocket.DiscordSocketClient _discord;
+		private readonly DiscordSocketClient _discord;
+		private readonly MilestoneInfoStorage _infoStorage;
 		private readonly CommandService _command;
-		private readonly Entity.BotConfig _config;
-		public Main(CommandService command, IServiceProvider service)
+		private readonly BotConfig _config;
+		private readonly ILogger _logger;
+		public MainModule(CommandService command, IServiceProvider service)
 		{
-			_discord = service.GetRequiredService<Discord.WebSocket.DiscordSocketClient>();
+			_discord = service.GetRequiredService<DiscordSocketClient>();
 			_command = command;
-			_config = service.GetRequiredService<IOptions<Entity.BotConfig>>().Value;
+			_config = service.GetRequiredService<IOptions<BotConfig>>().Value;
+			_infoStorage = service.GetRequiredService<MilestoneInfoStorage>();
+			_logger = service.GetRequiredService<ILogger<MainModule>>();
 		}
 		[Command("help")]
 		[Summary("Provides list of available commands.")]
@@ -36,7 +46,7 @@ namespace Bot.Modules
 
 			foreach (CommandInfo command in _command.Commands.ToList())
 			{
-				if (command.Module.Name == typeof(Main).Name)
+				if (command.Module.Name == typeof(MainModule).Name)
 					mainCommands += $"{_config.Prefix}{command.Name}, ";
 				//else if (command.Module.Name == typeof(ModerationModule).Name)
 				//	adminCommands += $"{guild.CommandPrefix ?? "!"}{command.Name}, ";
@@ -130,24 +140,22 @@ namespace Bot.Modules
 		{
 			try
 			{
-				
-
-				var milestone = await DatabaseHelper.GetMilestoneAsync(milestoneName);
+				var milestone = _infoStorage.SearchMilestone(milestoneName, MilestoneType.Raid);
 
 				if (milestone == null)
 				{
-					var AvailableRaids = "Доступные для регистрации активности:\n\n";
-					var info = DatabaseHelper.GetAllMilestones();
+					var AvailableRaids = "Доступные для регистрации рейды:\n\n";
+					var raids = _infoStorage.GetAllRaids();
 
-					foreach (var item in info)
+					foreach (var raid in raids)
 					{
-						AvailableRaids += $"**{item.Name}** или просто **{item.Alias}**\n";
+						AvailableRaids += $"**{raid.Name}** или просто **{raid.Alias}**\n";
 					}
 
 					var message = new EmbedBuilder()
 						.WithTitle("Страж, я не разобрала в какую активность ты хочешь пойти")
 						.WithColor(Color.Red)
-						.WithDescription(AvailableRaids += "\nПример: !сбор пж")
+						.WithDescription(AvailableRaids += "\nПример: !raid пж")
 						.WithFooter("Хочу напомнить, что я ищу как по полному названию рейда так и частичному. Это сообщение будет автоматически удалено через 2 минуты.");
 					await ReplyAndDeleteAsync(null, embed: message.Build(), timeout: TimeSpan.FromMinutes(2));
 					return;
@@ -183,11 +191,11 @@ namespace Bot.Modules
 					return;
 				}
 
-				var msg = await ReplyAsync(message: GuildConfig.settings.GlobalMention, embed: EmbedsHelper.MilestoneNew(Context.User, milestone, dateTime, MilestoneType.Default, userMemo, _customEmote.Raid));
-				await _milestone.RegisterMilestoneAsync(msg.Id, Context, dateTime, MilestoneType.Default, milestone.Id, userMemo);
+				//var msg = await ReplyAsync(message: GuildConfig.settings.GlobalMention, embed: EmbedsHelper.MilestoneNew(Context.User, milestone, dateTime, userMemo, _customEmote.Raid));
+				//await _milestone.RegisterMilestoneAsync(msg.Id, Context, dateTime, MilestoneType.Default, milestone.Id, userMemo);
 
-				//Slots
-				await msg.AddReactionAsync(_customEmote.Raid);
+				////Slots
+				//await msg.AddReactionAsync(_customEmote.Raid);
 			}
 			catch (Exception ex)
 			{

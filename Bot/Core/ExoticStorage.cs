@@ -12,7 +12,7 @@ namespace Bot.Core
 
 		static ExoticStorage()
 		{
-			var exoticsFolder = Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), Constants.ResourceFolder, Constants.ExoticsFolder));
+			var exoticsFolder = Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), Constants.ResourceFolder, "exotics"));
 			var files = exoticsFolder.GetFiles("*.json");
 			if (files.Length > 0)
 			{

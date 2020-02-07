@@ -2,6 +2,7 @@ using Bot.Entity;
 using Bot.Services;
 using Bot.Services.Quartz;
 using Bot.Services.Quartz.Jobs;
+using Bot.Services.Storage;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -48,6 +49,8 @@ namespace Bot
 					services.AddSingleton<MilestoneEmoji>();
 					services.AddSingleton<InteractiveService>();
 					services.AddSingleton<GuildEventHandler>();
+					//Data Storage services
+					services.AddSingleton<MilestoneInfoStorage>();
 
 					// Quartz services
 					services.AddHostedService<Quartz>();
@@ -56,10 +59,10 @@ namespace Bot
 					// Quartz jobs
 					services.AddSingleton<XurArrive>();
 					services.AddSingleton<XurLeave>();
-					var hour = hostContext.Configuration.GetSection("BotConfig:XurHour");
+					var hour = hostContext.Configuration.GetSection("BotConfig:XurHour").Get<int>();
 					// Quartz triggers
-					services.AddSingleton(new JobSchedule(typeof(XurArrive), "0 0 20 ? * FRI")); // run every Friday in 20:00
-					services.AddSingleton(new JobSchedule(typeof(XurLeave), "0 0 20 ? * TUE")); // run every Tuesday in 20:00
+					services.AddSingleton(new JobSchedule(typeof(XurArrive), $"0 0 {hour} ? * FRI")); // run every Friday in 20:00
+					services.AddSingleton(new JobSchedule(typeof(XurLeave), $"0 0 {hour} ? * TUE")); // run every Tuesday in 20:00
 
 				});
 	}

@@ -21,5 +21,7 @@
 
   <ItemGroup>
     <Folder Include="resources\backgrounds\" />
+    <Folder Include="resources\strikes\" />
+    <Folder Include="resources\raids\" />
   </ItemGroup>
 </Project>
