@@ -10,8 +10,10 @@ namespace Bot.Entity.Milestone
 		public ulong MessageId { get; set; }
 		[MaxLength(1000)]
 		public string Memo { get; set; }
+		[Required]
 		public DateTime DateExpire { get; set; }
+		[Required]
 		public MilestoneInfo Info { get; set; }
-		public IEnumerable<ulong> Members { get; set; }
+		public List<ulong> Members { get; set; } = new List<ulong>();
 	}
 }

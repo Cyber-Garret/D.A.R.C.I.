@@ -46,11 +46,12 @@ namespace Bot
 					services.AddSingleton<CommandService>();
 					services.AddSingleton<DiscordLogging>();
 					services.AddSingleton<CommandHandler>();
-					services.AddSingleton<MilestoneEmoji>();
 					services.AddSingleton<InteractiveService>();
-					services.AddSingleton<GuildEventHandler>();
+					services.AddSingleton<DiscordEventHandler>();
+					services.AddSingleton<MilestoneHandler>();
 					//Data Storage services
 					services.AddSingleton<MilestoneInfoStorage>();
+					services.AddSingleton<RaidStorage>();
 
 					// Quartz services
 					services.AddHostedService<Quartz>();

@@ -17,6 +17,8 @@ using System.Threading.Tasks;
 using Bot.Services.Storage;
 using System.Globalization;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using Bot.Services;
 
 namespace Bot.Modules
 {
@@ -24,6 +26,8 @@ namespace Bot.Modules
 	{
 		private readonly DiscordSocketClient _discord;
 		private readonly MilestoneInfoStorage _infoStorage;
+		private readonly MilestoneHandler _milestoneHandler;
+		private readonly RaidStorage _raidStorage;
 		private readonly CommandService _command;
 		private readonly BotConfig _config;
 		private readonly ILogger _logger;
@@ -33,6 +37,7 @@ namespace Bot.Modules
 			_command = command;
 			_config = service.GetRequiredService<IOptions<BotConfig>>().Value;
 			_infoStorage = service.GetRequiredService<MilestoneInfoStorage>();
+			_raidStorage = service.GetRequiredService<RaidStorage>();
 			_logger = service.GetRequiredService<ILogger<MainModule>>();
 		}
 		[Command("help")]
@@ -136,7 +141,7 @@ namespace Bot.Modules
 		[Command("raid")]
 		[Summary("Command for announcing raid, for register clan mates with inline reaction.")]
 		[Remarks("!raid <name> <reserved place> <time> <memo(can be empty)>\nEx: !raid lw 03.02.20.00 ")]
-		public async Task GoRaid(string milestoneName, int reserved, string raidTime, [Remainder]string leaderMemo = null)
+		public async Task GoRaid(string milestoneName, byte reserved, string raidTime, [Remainder]string memo = null)
 		{
 			try
 			{
@@ -163,7 +168,7 @@ namespace Bot.Modules
 
 				string[] formats = { "dd.MM-HH:mm", "dd,MM-HH,mm", "dd.MM.HH.mm", "dd,MM,HH,mm" };
 
-				DateTime.TryParseExact(raidTime, formats, CultureInfo.InstalledUICulture, DateTimeStyles.None, out DateTime dateTime);
+				DateTime.TryParseExact(raidTime, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime);
 
 				if (dateTime == new DateTime())
 				{
@@ -191,25 +196,60 @@ namespace Bot.Modules
 					return;
 				}
 
-				//var msg = await ReplyAsync(message: GuildConfig.settings.GlobalMention, embed: EmbedsHelper.MilestoneNew(Context.User, milestone, dateTime, userMemo, _customEmote.Raid));
-				//await _milestone.RegisterMilestoneAsync(msg.Id, Context, dateTime, MilestoneType.Default, milestone.Id, userMemo);
+				var newRaid = new Raid
+				{
+					Info = milestone,
+					DateExpire = dateTime,
+					Memo = memo,
+				};
+				newRaid.Members.Add(Context.User.Id);
+				newRaid.Info.MaxSpace -= reserved;
+				var msg = await ReplyAsync(message: GuildConfig.settings.GlobalMention, embed: MilestoneEmbed(newRaid, _milestoneHandler.Plus));
 
-				////Slots
-				//await msg.AddReactionAsync(_customEmote.Raid);
+				newRaid.MessageId = msg.Id;
+				_raidStorage.AddRaid(newRaid);
+				//Slots
+				await msg.AddReactionAsync(_milestoneHandler.Plus);
 			}
 			catch (Exception ex)
 			{
 				//reply to user if any error
-				await ReplyAndDeleteAsync("Страж, произошла критическая ошибка, я не могу в данный момент выполнить команду.\nУже пишу моему создателю, он сейчас все поправит.");
-				//Get App info 
-				var app = await _discord.GetApplicationInfoAsync();
-				//Get Owner for DM
-				var owner = await app.Owner.GetOrCreateDMChannelAsync();
-				//Send DM message with exception
-				await owner.SendMessageAsync($"Капитан, проблема с командой сбор! **{ex.Message}** больше подробностей в консоли.");
+				await ReplyAndDeleteAsync($"Страж, произошла критическая ошибка, я не могу в данный момент выполнить команду.\nMessage: {ex.Message}.");
 				//Log full exception in console
 				_logger.LogCritical(ex, "Milestone command");
 			}
+		}
+
+		private Embed MilestoneEmbed(Raid raid, IEmote raidEmote = null)
+		{
+			var embed = new EmbedBuilder
+			{
+				Title = $"{raid.DateExpire.Date.ToString("dd.MM.yyyy")}, в {raid.DateExpire.ToString("HH:mm")}. {raid.Info.DisplayType}: {raid.Info.Name}",
+				ThumbnailUrl = raid.Info.Icon,
+				Color = Color.DarkMagenta
+			};
+			//Add milestone leader memo if represent
+			if (!string.IsNullOrWhiteSpace(raid.Memo))
+				embed.WithDescription($"**Заметка:** {raid.Memo}");
+
+			var embedFieldUsers = new EmbedFieldBuilder
+			{
+				Name = $"В боевую группу записались"
+			};
+			int count = 1;
+			foreach (var user in raid.Members)
+			{
+				var discordUser = _discord.GetUser(user);
+				embedFieldUsers.Value += $"#{count} {discordUser.Mention} - {discordUser.Username}\n";
+				count++;
+			}
+			if (embedFieldUsers.Value != null)
+				embed.AddField(embedFieldUsers);
+
+
+			embed.WithFooter($"Чтобы за вами закрепили место нажмите на реакцию - {raidEmote}");
+
+			return embed.Build();
 		}
 	}
 }

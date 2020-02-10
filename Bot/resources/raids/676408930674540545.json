@@ -1,0 +1,16 @@
+{
+  "MessageId": 676408930674540545,
+  "Memo": null,
+  "DateExpire": "2020-02-10T20:00:00",
+  "Info": {
+    "Name": "Левиафан",
+    "Alias": "левик",
+    "DisplayType": "Рейд",
+    "Type": 0,
+    "Icon": "http://neira.su/img/milestones/leviathan.jpg",
+    "MaxSpace": 5
+  },
+  "Members": [
+    316272461291192322
+  ]
+}

@@ -1,5 +1,7 @@
 ﻿using Bot.Entity;
+using Bot.Entity.Milestone;
 using Discord;
+using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Text;

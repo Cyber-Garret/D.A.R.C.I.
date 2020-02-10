@@ -10,6 +10,6 @@ namespace Bot.Entity.Milestone
 		public string Memo { get; set; }
 		public DateTime DateExpire { get; set; }
 		public MilestoneInfo Info { get; set; }
-		public IEnumerable<ulong> Members { get; set; }
+		public List<ulong> Members { get; set; }
 	}
 }

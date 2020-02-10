@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Bot.Entity;
 using Bot.Services;
+using Bot.Services.Storage;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ namespace Bot
 		private readonly ILogger<Darci> _logger;
 		private readonly DiscordSocketClient _discord;
 		private readonly BotConfig _config;
+		private readonly RaidStorage _raidStorage;
 
 		public Darci(IServiceProvider service)
 		{
@@ -27,13 +29,14 @@ namespace Bot
 			_logger = service.GetRequiredService<ILogger<Darci>>();
 			_discord = service.GetRequiredService<DiscordSocketClient>();
 			_config = service.GetRequiredService<IOptions<BotConfig>>().Value;
+			_raidStorage = service.GetRequiredService<RaidStorage>();
 		}
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{
 			//Initialize service
 			_service.GetRequiredService<DiscordLogging>().Configure();
-			_service.GetRequiredService<GuildEventHandler>().InitDiscordEvents();
+			_service.GetRequiredService<DiscordEventHandler>().InitDiscordEvents();
 			await _service.GetRequiredService<CommandHandler>().ConfigureAsync();
 
 			await _discord.LoginAsync(TokenType.Bot, _config.Token);
@@ -43,6 +46,7 @@ namespace Bot
 		}
 		public override async Task StopAsync(CancellationToken cancellationToken)
 		{
+			_raidStorage.SaveRaids();
 			await _discord.SetStatusAsync(UserStatus.Offline);
 			await _discord.LogoutAsync();
 		}

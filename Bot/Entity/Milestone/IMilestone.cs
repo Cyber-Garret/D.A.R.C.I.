@@ -13,6 +13,6 @@ namespace Bot.Entity.Milestone
 
 		MilestoneInfo Info { get; set; }
 
-		IEnumerable<ulong> Members { get; set; }
+		List<ulong> Members { get; set; }
 	}
 }
