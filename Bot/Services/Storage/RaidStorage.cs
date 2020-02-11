@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Bot.Services.Storage
@@ -27,6 +28,17 @@ namespace Bot.Services.Storage
 			}
 		}
 
+		/// <summary>
+		/// Get all Raids ordered by DateExpire for old to new
+		/// </summary>
+		/// <returns></returns>
+		internal List<Raid> GetAllRaids()
+		{
+			return Raids.Values
+				.OrderBy(r => r.DateExpire)
+				.ToList();
+		}
+
 		internal Raid GetRaid(ulong messageId)
 		{
 			Raids.TryGetValue(messageId, out Raid raid);
@@ -37,6 +49,14 @@ namespace Bot.Services.Storage
 		internal void AddRaid(Raid raid)
 		{
 			Raids.TryAdd(raid.MessageId, raid);
+		}
+
+		internal void RemoveRaid(ulong MessageId)
+		{
+			//remove from dictionary
+			Raids.TryRemove(MessageId, out Raid value);
+			//remove file
+			DataStorage.RemoveObject(Path.Combine(Directory.GetCurrentDirectory(), Constants.ResourceFolder, RaidsFolderName, $"{MessageId}.json"));
 		}
 
 		internal void SaveRaids(params ulong[] ids)

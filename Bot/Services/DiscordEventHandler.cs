@@ -17,7 +17,7 @@ namespace Bot.Services
 		private readonly ILogger _logger;
 		private readonly DiscordSocketClient _discord;
 		private readonly CommandHandler _command;
-		private readonly RaidStorage _raidStorage;
+		private readonly MilestoneHandler _milestoneHandler;
 		private readonly IEmote Plus = new Emoji(@"➕");
 
 		public DiscordEventHandler(IServiceProvider service)
@@ -25,7 +25,7 @@ namespace Bot.Services
 			_logger = service.GetRequiredService<ILogger<DiscordEventHandler>>();
 			_discord = service.GetRequiredService<DiscordSocketClient>();
 			_command = service.GetRequiredService<CommandHandler>();
-			_raidStorage = service.GetRequiredService<RaidStorage>();
+			_milestoneHandler = service.GetRequiredService<MilestoneHandler>();
 		}
 
 		internal void InitDiscordEvents()
@@ -45,7 +45,7 @@ namespace Bot.Services
 		{
 			Task.Run(async () =>
 			{
-				await MilestoneReactionAdded(cacheable, reaction);
+				await _milestoneHandler.MilestoneReactionAdded(cacheable, reaction);
 			});
 			return Task.CompletedTask;
 		}
@@ -60,55 +60,6 @@ namespace Bot.Services
 				await _command.HandleCommandAsync(msg);
 			});
 			return Task.CompletedTask;
-		}
-
-		private async Task MilestoneReactionAdded(Cacheable<IUserMessage, ulong> cache, SocketReaction reaction)
-		{
-			try
-			{
-				var msg = await cache.GetOrDownloadAsync();
-				//get milestone
-				var milestone = _raidStorage.GetRaid(msg.Id);
-
-				if (milestone == null) return;
-
-				if (reaction.Emote.Equals(Plus))
-				{
-					//check reaction
-					var UserExist = milestone.Members.Any(u => u == reaction.UserId);
-
-					if (!UserExist && milestone.Members.Count + 1 < milestone.Info.MaxSpace)
-					{
-						milestone.Members.Add(reaction.UserId);
-						_raidStorage.SaveRaids(msg.Id);
-						
-						HandleReaction(msg, milestone);
-					}
-					else
-					{
-						var user = _discord.GetUser(reaction.UserId);
-						await msg.RemoveReactionAsync(Plus, user);
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				_logger.LogWarning(ex, "Reaction Added in Milestone");
-			}
-		}
-
-		private async void HandleReaction(IUserMessage message, Raid activeRaid)
-		{
-			var newEmbed = embed.MilestoneRebuild(_discord, activeMilestone, _emote.Raid);
-			if (newEmbed.Length != 0)
-				await message.ModifyAsync(m => m.Embed = newEmbed);
-			if (activeMilestone.Milestone.MaxSpace == activeMilestone.MilestoneUsers.Count + 1 && activeMilestone.DateExpire < DateTime.Now.AddMinutes(15))
-			{
-				await message.RemoveAllReactionsAsync();
-				await message.ModifyAsync(c => c.Embed = EmbedsHelper.MilestoneEnd(_discord, activeMilestone));
-
-				await RaidNotificationAsync(activeMilestone, RemindType.FullCount);
-			}
 		}
 	}
 }

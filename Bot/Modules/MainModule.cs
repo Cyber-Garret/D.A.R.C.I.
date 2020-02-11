@@ -204,7 +204,7 @@ namespace Bot.Modules
 				};
 				newRaid.Members.Add(Context.User.Id);
 				newRaid.Info.MaxSpace -= reserved;
-				var msg = await ReplyAsync(message: GuildConfig.settings.GlobalMention, embed: MilestoneEmbed(newRaid, _milestoneHandler.Plus));
+				var msg = await ReplyAsync(message: GuildConfig.settings.GlobalMention, embed: _milestoneHandler.RaidEmbed(newRaid));
 
 				newRaid.MessageId = msg.Id;
 				_raidStorage.AddRaid(newRaid);
@@ -218,38 +218,6 @@ namespace Bot.Modules
 				//Log full exception in console
 				_logger.LogCritical(ex, "Milestone command");
 			}
-		}
-
-		private Embed MilestoneEmbed(Raid raid, IEmote raidEmote = null)
-		{
-			var embed = new EmbedBuilder
-			{
-				Title = $"{raid.DateExpire.Date.ToString("dd.MM.yyyy")}, в {raid.DateExpire.ToString("HH:mm")}. {raid.Info.DisplayType}: {raid.Info.Name}",
-				ThumbnailUrl = raid.Info.Icon,
-				Color = Color.DarkMagenta
-			};
-			//Add milestone leader memo if represent
-			if (!string.IsNullOrWhiteSpace(raid.Memo))
-				embed.WithDescription($"**Заметка:** {raid.Memo}");
-
-			var embedFieldUsers = new EmbedFieldBuilder
-			{
-				Name = $"В боевую группу записались"
-			};
-			int count = 1;
-			foreach (var user in raid.Members)
-			{
-				var discordUser = _discord.GetUser(user);
-				embedFieldUsers.Value += $"#{count} {discordUser.Mention} - {discordUser.Username}\n";
-				count++;
-			}
-			if (embedFieldUsers.Value != null)
-				embed.AddField(embedFieldUsers);
-
-
-			embed.WithFooter($"Чтобы за вами закрепили место нажмите на реакцию - {raidEmote}");
-
-			return embed.Build();
 		}
 	}
 }

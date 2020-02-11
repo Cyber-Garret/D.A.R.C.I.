@@ -19,14 +19,12 @@ namespace Bot.Services
 		private readonly ILogger _logger;
 		private readonly DiscordSocketClient _discord;
 		private readonly CommandService _commands;
-		MilestoneEmoji _emoji;
 
 		public DiscordLogging(IServiceProvider services)
 		{
 			// get the services we need via DI, and assign the fields declared above to them
 			_discord = services.GetRequiredService<DiscordSocketClient>();
 			_commands = services.GetRequiredService<CommandService>();
-			_emoji = services.GetRequiredService<MilestoneEmoji>();
 			_logger = services.GetRequiredService<ILogger<DiscordLogging>>();
 		}
 
@@ -43,10 +41,6 @@ namespace Bot.Services
 		private Task OnReadyAsync()
 		{
 			_logger.LogInformation($"Connected as -> [{_discord.CurrentUser}] :)");
-			// load milestone emoji if not loaded
-			if (_emoji.Raid != null)
-				_emoji.Configure();
-
 			return Task.CompletedTask;
 		}
 

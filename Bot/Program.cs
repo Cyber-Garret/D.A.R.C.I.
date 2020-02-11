@@ -39,7 +39,7 @@ namespace Bot
 					{
 						ExclusiveBulkDelete = true,
 						AlwaysDownloadUsers = true,
-						LogLevel = LogSeverity.Warning,
+						LogLevel = LogSeverity.Verbose,
 						DefaultRetryMode = RetryMode.AlwaysRetry,
 						MessageCacheSize = 1000
 					}));
@@ -60,10 +60,13 @@ namespace Bot
 					// Quartz jobs
 					services.AddSingleton<XurArrive>();
 					services.AddSingleton<XurLeave>();
-					var hour = hostContext.Configuration.GetSection("BotConfig:XurHour").Get<int>();
+					services.AddSingleton<MilestoneRemind>();
 					// Quartz triggers
+					var hour = hostContext.Configuration.GetSection("BotConfig:XurHour").Get<int>();
 					services.AddSingleton(new JobSchedule(typeof(XurArrive), $"0 0 {hour} ? * FRI")); // run every Friday in 20:00
 					services.AddSingleton(new JobSchedule(typeof(XurLeave), $"0 0 {hour} ? * TUE")); // run every Tuesday in 20:00
+
+					services.AddSingleton(new JobSchedule(typeof(MilestoneRemind), "0/10 * * * * ?")); // run every 10 seconds.
 
 				});
 	}
