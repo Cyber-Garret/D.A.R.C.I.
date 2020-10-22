@@ -1,13 +1,10 @@
-﻿using Bot.Services.Storage;
-using Discord.WebSocket;
-using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Quartz;
 
-namespace Bot.Services.Quartz.Jobs
+namespace Chrono.Jobs
 {
 	[DisallowConcurrentExecution]
 	public class MilestoneRemind : IJob

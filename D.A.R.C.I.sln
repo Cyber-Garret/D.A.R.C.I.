@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bot", "Bot\Bot.csproj", "{4DF96C5F-11CF-4F64-B87A-937387F8D360}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bot", "Bot\Bot.csproj", "{4DF96C5F-11CF-4F64-B87A-937387F8D360}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chrono", "Chrono\Chrono.csproj", "{FFC6306B-9CC5-420D-B9F5-B6BEAD05DB0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Neiralink", "Neiralink\Neiralink.csproj", "{43BA600A-1E44-46BE-B796-A11B24DFE36F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{4DF96C5F-11CF-4F64-B87A-937387F8D360}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DF96C5F-11CF-4F64-B87A-937387F8D360}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DF96C5F-11CF-4F64-B87A-937387F8D360}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFC6306B-9CC5-420D-B9F5-B6BEAD05DB0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFC6306B-9CC5-420D-B9F5-B6BEAD05DB0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFC6306B-9CC5-420D-B9F5-B6BEAD05DB0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFC6306B-9CC5-420D-B9F5-B6BEAD05DB0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43BA600A-1E44-46BE-B796-A11B24DFE36F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43BA600A-1E44-46BE-B796-A11B24DFE36F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43BA600A-1E44-46BE-B796-A11B24DFE36F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43BA600A-1E44-46BE-B796-A11B24DFE36F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,8 +1,7 @@
 using Bot.Entity;
 using Bot.Services;
-using Bot.Services.Quartz;
-using Bot.Services.Quartz.Jobs;
 using Bot.Services.Storage;
+using Chrono.Extensions;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -12,20 +11,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Quartz;
-using Quartz.Impl;
-using Quartz.Spi;
-
 namespace Bot
 {
-	public class Program
+	public static class Program
 	{
 		public static void Main()
 		{
 			CreateHostBuilder().Build().Run();
 		}
 
-		public static IHostBuilder CreateHostBuilder() =>
+		private static IHostBuilder CreateHostBuilder() =>
 			Host.CreateDefaultBuilder()
 				.ConfigureServices((hostContext, services) =>
 				{
@@ -53,21 +48,8 @@ namespace Bot
 					services.AddSingleton<MilestoneInfoStorage>();
 					services.AddSingleton<RaidStorage>();
 
-					// Quartz services
-					services.AddHostedService<Quartz>();
-					services.AddSingleton<IJobFactory, SingletonJobFactory>();
-					services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
-					// Quartz jobs
-					services.AddSingleton<XurArrive>();
-					services.AddSingleton<XurLeave>();
-					services.AddSingleton<MilestoneRemind>();
-					// Quartz triggers
-					var hour = hostContext.Configuration.GetSection("BotConfig:XurHour").Get<int>();
-					services.AddSingleton(new JobSchedule(typeof(XurArrive), $"0 0 {hour} ? * FRI")); // run every Friday in 20:00
-					services.AddSingleton(new JobSchedule(typeof(XurLeave), $"0 0 {hour} ? * TUE")); // run every Tuesday in 20:00
-
-					services.AddSingleton(new JobSchedule(typeof(MilestoneRemind), "0/10 * * * * ?")); // run every 10 seconds.
-
+					services.AddChrono();
+					services.AddNeiralink();
 				});
 	}
 }

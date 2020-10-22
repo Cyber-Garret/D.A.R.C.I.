@@ -5,11 +5,12 @@ using Quartz.Spi;
 
 using System;
 
-namespace Bot.Services.Quartz
+namespace Chrono
 {
-	public class SingletonJobFactory : IJobFactory
+	internal class SingletonJobFactory : IJobFactory
 	{
 		private readonly IServiceProvider _serviceProvider;
+
 		public SingletonJobFactory(IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider;
@@ -21,17 +22,5 @@ namespace Bot.Services.Quartz
 		}
 
 		public void ReturnJob(IJob job) { }
-	}
-
-	public class JobSchedule
-	{
-		public JobSchedule(Type jobType, string cronExpression)
-		{
-			JobType = jobType;
-			CronExpression = cronExpression;
-		}
-
-		public Type JobType { get; }
-		public string CronExpression { get; }
 	}
 }

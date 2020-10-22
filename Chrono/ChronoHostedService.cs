@@ -1,19 +1,16 @@
-﻿using Bot.Services.Quartz;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
 using Quartz;
 using Quartz.Spi;
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Bot
+namespace Chrono
 {
-	public class Quartz : BackgroundService
+	internal class ChronoHostedService : BackgroundService
 	{
 		public IScheduler Scheduler { get; set; }
 
@@ -21,11 +18,11 @@ namespace Bot
 		private readonly IJobFactory _jobFactory;
 		private readonly IEnumerable<JobSchedule> _jobSchedules;
 
-		public Quartz(IServiceProvider service)
+		public ChronoHostedService(ISchedulerFactory schedulerFactory, IJobFactory jobFactory, IEnumerable<JobSchedule> jobSchedules)
 		{
-			_schedulerFactory = service.GetRequiredService<ISchedulerFactory>();
-			_jobFactory = service.GetRequiredService<IJobFactory>();
-			_jobSchedules = service.GetRequiredService<IEnumerable<JobSchedule>>();
+			_schedulerFactory = schedulerFactory;
+			_jobFactory = jobFactory;
+			_jobSchedules = jobSchedules;
 		}
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{

@@ -1,17 +1,12 @@
-﻿using Bot.Core;
-using Bot.Helpers;
-using Discord.WebSocket;
-
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
-using Quartz;
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Quartz;
 
-namespace Bot.Services.Quartz.Jobs
+namespace Chrono.Jobs
 {
 	[DisallowConcurrentExecution]
 	public class XurArrive : IJob
