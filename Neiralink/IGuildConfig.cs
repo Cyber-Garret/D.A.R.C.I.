@@ -6,7 +6,16 @@ namespace Neiralink
 {
 	public interface IGuildConfig
 	{
+		/// <summary>
+		/// Return guild configuration
+		/// </summary>
+		/// <returns></returns>
 		Task<Guild> GetGuildConfig();
-		Task<Guild> SaveGuildConfig();
+		/// <summary>
+		/// Save to file and in memory guild configuration
+		/// </summary>
+		/// <param name="guild"></param>
+		/// <returns></returns>
+		Task<Guild> SaveGuildConfig(Guild guild);
 	}
 }

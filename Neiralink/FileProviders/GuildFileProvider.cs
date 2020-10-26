@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+
 using Microsoft.VisualBasic;
+
 using Neiralink.Entities;
+
 using Newtonsoft.Json;
 
 namespace Neiralink.FileProviders
 {
+
+	// TODO:Threadsafe
 	internal class GuildFileProvider : IGuildConfig
 	{
 		private static Guild _guild;
@@ -40,7 +45,7 @@ namespace Neiralink.FileProviders
 			throw new NotImplementedException();
 		}
 
-		public Task<Guild> SaveGuildConfig()
+		public Task<Guild> SaveGuildConfig(Guild guild)
 		{
 			throw new NotImplementedException();
 		}

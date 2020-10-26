@@ -17,20 +17,31 @@ namespace Neiralink.Helpers
 				Directory.CreateDirectory(rootPath);
 		}
 
-		internal static void StoreObject(object obj, string filePath, bool useIndentations)
+		/// <summary>
+		/// Help construnct full filepath
+		/// </summary>
+		/// <param name="directory">directory name under main directory</param>
+		/// <param name="fileName">file name from resources folder</param>
+		/// <returns>Full path</returns>
+		internal string GetFilePath(string fileName, string directory = null)
 		{
-			var formatting = (useIndentations) ? Formatting.Indented : Formatting.None;
-			string json = JsonConvert.SerializeObject(obj, formatting);
+			return Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty, RootFolderName, directory ?? string.Empty, fileName);
+		}
+
+		internal void StoreObject(object obj, string filePath, bool useIndentations)
+		{
+			var formatting = useIndentations ? Formatting.Indented : Formatting.None;
+			var json = JsonConvert.SerializeObject(obj, formatting);
 			File.WriteAllText(filePath, json);
 		}
 
-		internal static T RestoreObject<T>(string filePath)
+		internal T RestoreObject<T>(string filePath)
 		{
 			var json = GetOrCreateFileContents(filePath);
 			return JsonConvert.DeserializeObject<T>(json);
 		}
 
-		internal static void RemoveObject(string filePath)
+		internal void RemoveObject(string filePath)
 		{
 			if (File.Exists(filePath))
 				File.Delete(filePath);

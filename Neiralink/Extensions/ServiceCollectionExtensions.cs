@@ -1,11 +1,8 @@
-﻿
-using System;
-using System.IO;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 using Neiralink;
 using Neiralink.FileProviders;
+using Neiralink.Helpers;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -16,6 +13,9 @@ namespace Microsoft.Extensions.DependencyInjection
 		{
 			var neiralinkConfiguration = new NeiralinkConfiguration();
 			configuration.GetSection(NeiralinkConfiguration.Neiralink).Bind(neiralinkConfiguration);
+
+			//Add internal file helper service
+			services.AddSingleton<FileHelperService>();
 
 			AddGuild(services, neiralinkConfiguration.GuildId);
 			AddCatalystService(services);
