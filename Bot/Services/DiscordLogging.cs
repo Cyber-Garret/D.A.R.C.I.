@@ -2,7 +2,6 @@
 using Discord.Commands;
 using Discord.WebSocket;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -16,17 +15,17 @@ namespace Bot.Services
 	internal class DiscordLogging
 	{
 		// declare the fields used later in this class
-		private readonly ILogger _logger;
+		private readonly ILogger<DiscordLogging> _logger;
 		private readonly DiscordSocketClient _discord;
 		private readonly CommandService _commands;
 
-		public DiscordLogging(IServiceProvider services)
+		public DiscordLogging(ILogger<DiscordLogging> logger, DiscordSocketClient discord, CommandService commands)
 		{
-			// get the services we need via DI, and assign the fields declared above to them
-			_discord = services.GetRequiredService<DiscordSocketClient>();
-			_commands = services.GetRequiredService<CommandService>();
-			_logger = services.GetRequiredService<ILogger<DiscordLogging>>();
+			_logger = logger;
+			_discord = discord;
+			_commands = commands;
 		}
+
 
 		public void Configure()
 		{
@@ -54,44 +53,32 @@ namespace Bot.Services
 		// this method switches out the severity level from Discord.Net's API, and logs appropriately
 		private Task OnLogAsync(LogMessage message)
 		{
-			string logText = $"{message.Source}: {message.Message}";
+			var logText = $"{message.Source}: {message.Message}";
 			switch (message.Severity)
 			{
 				case LogSeverity.Critical:
-					{
-						_logger.LogCritical(logText);
-						break;
-					}
+					_logger.LogCritical(logText);
+					break;
 				case LogSeverity.Error:
-					{
-						_logger.LogError(logText);
-						break;
-					}
+					_logger.LogError(logText);
+					break;
 				case LogSeverity.Warning:
-					{
-						_logger.LogWarning(logText);
-						break;
-					}
-				case LogSeverity.Info:
-					{
-						_logger.LogInformation(logText);
-						break;
-					}
-				case LogSeverity.Verbose:
-					{
-						_logger.LogTrace(logText);
-						break;
-					}
-				case LogSeverity.Debug:
-					{
-						_logger.LogDebug(logText);
-						break;
-					}
-
-				default:
 					_logger.LogWarning(logText);
 					break;
+				case LogSeverity.Info:
+					_logger.LogInformation(logText);
+					break;
+				case LogSeverity.Verbose:
+					_logger.LogTrace(logText);
+					break;
+				case LogSeverity.Debug:
+					_logger.LogDebug(logText);
+					break;
+				default:
+					_logger.LogInformation(logText);
+					break;
 			}
+
 			return Task.CompletedTask;
 		}
 	}

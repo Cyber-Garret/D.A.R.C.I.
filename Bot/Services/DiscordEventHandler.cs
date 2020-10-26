@@ -1,65 +1,51 @@
-﻿using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
-using Bot.Services.Storage;
-using System.Linq;
+﻿using Discord;
+using Discord.WebSocket;
+
 using Microsoft.Extensions.Logging;
-using Bot.Entity.Milestone;
+
+using System;
+using System.Threading.Tasks;
 
 namespace Bot.Services
 {
 	internal class DiscordEventHandler
 	{
-		private readonly ILogger _logger;
+		private readonly ILogger<DiscordEventHandler> _logger;
 		private readonly DiscordSocketClient _discord;
 		private readonly CommandHandler _command;
-		private readonly MilestoneHandler _milestoneHandler;
-		private readonly IEmote Plus = new Emoji(@"➕");
 
-		public DiscordEventHandler(IServiceProvider service)
+		public DiscordEventHandler(ILogger<DiscordEventHandler> logger, DiscordSocketClient discord, CommandHandler command)
 		{
-			_logger = service.GetRequiredService<ILogger<DiscordEventHandler>>();
-			_discord = service.GetRequiredService<DiscordSocketClient>();
-			_command = service.GetRequiredService<CommandHandler>();
-			_milestoneHandler = service.GetRequiredService<MilestoneHandler>();
+			_logger = logger;
+			_discord = discord;
+			_command = command;
 		}
+
 
 		internal void InitDiscordEvents()
 		{
-			_discord.MessageReceived += _discord_MessageReceived;
+			_discord.MessageReceived += Discord_MessageReceived;
 			//Reactions
-			_discord.ReactionAdded += _discord_ReactionAdded;
-			_discord.ReactionRemoved += _discord_ReactionRemoved;
+			_discord.ReactionAdded += Discord_ReactionAdded;
+			_discord.ReactionRemoved += Discord_ReactionRemoved;
 		}
 
-		private Task _discord_ReactionRemoved(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
+		private static Task Discord_ReactionAdded(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
 		{
 			throw new NotImplementedException();
 		}
 
-		private Task _discord_ReactionAdded(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
+		private static Task Discord_ReactionRemoved(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
 		{
-			Task.Run(async () =>
-			{
-				await _milestoneHandler.MilestoneReactionAdded(cacheable, reaction);
-			});
-			return Task.CompletedTask;
+			throw new NotImplementedException();
 		}
 
-		private Task _discord_MessageReceived(SocketMessage msg)
+		private async Task Discord_MessageReceived(SocketMessage msg)
 		{
 			// ignore messages from bots
-			if (msg.Author.IsBot) return Task.CompletedTask;
+			if (msg.Author.IsBot) return;
 
-			Task.Run(async () =>
-			{
-				await _command.HandleCommandAsync(msg);
-			});
-			return Task.CompletedTask;
+			await _command.HandleCommandAsync(msg);
 		}
 	}
 }

@@ -1,7 +1,9 @@
 using Bot.Entity;
 using Bot.Services;
 using Bot.Services.Storage;
+
 using Chrono.Extensions;
+
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -43,13 +45,10 @@ namespace Bot
 					services.AddSingleton<CommandHandler>();
 					services.AddSingleton<InteractiveService>();
 					services.AddSingleton<DiscordEventHandler>();
-					services.AddSingleton<MilestoneHandler>();
 					//Data Storage services
-					services.AddSingleton<MilestoneInfoStorage>();
-					services.AddSingleton<RaidStorage>();
 
-					services.AddChrono();
-					services.AddNeiralink();
+					services.AddChrono(hostContext.Configuration);
+					services.AddNeiralink(hostContext.Configuration);
 				});
 	}
 }

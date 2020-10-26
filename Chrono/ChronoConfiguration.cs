@@ -20,10 +20,5 @@ namespace Chrono
 		/// Quartz cron Expression
 		/// </summary>
 		public string XurLeave { get; set; }
-
-		/// <summary>
-		/// Quartz cron Expression
-		/// </summary>
-		public string MilestoneReminder { get; set; }
 	}
 }

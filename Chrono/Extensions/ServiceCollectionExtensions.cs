@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 using Chrono.Jobs;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Quartz;
@@ -15,10 +18,13 @@ namespace Chrono.Extensions
 		/// <summary>
 		/// Quartz DI services for discord bot
 		/// </summary>
-		public static void AddChrono(this IServiceCollection services, ChronoConfiguration configuration)
+		public static void AddChrono(this IServiceCollection services, IConfiguration config)
 		{
+			var chronoConfig = new ChronoConfiguration();
+			config.GetSection(ChronoConfiguration.Chrono).Bind(chronoConfig);
+
 			AddQuartzBaseServices(services);
-			AddQuartzJobs(services);
+			AddQuartzJobs(services, chronoConfig);
 		}
 
 		private static void AddQuartzBaseServices(IServiceCollection services)
@@ -28,15 +34,15 @@ namespace Chrono.Extensions
 			services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 		}
 
-		private static void AddQuartzJobs(IServiceCollection services)
+		private static void AddQuartzJobs(IServiceCollection services, ChronoConfiguration config)
 		{
 			// Quartz jobs
 			services.AddSingleton<XurArrive>();
 			services.AddSingleton<XurLeave>();
 			services.AddSingleton<MilestoneRemind>();
 			// Quartz triggers
-			services.AddSingleton(new JobSchedule(typeof(XurArrive), "0 0 0/20 ? * FRI")); // run every Friday in 20:00
-			services.AddSingleton(new JobSchedule(typeof(XurLeave), "0 0 0/20 ? * TUE")); // run every Tuesday in 20:00
+			services.AddSingleton(new JobSchedule(typeof(XurArrive), config.XurArrive)); // run every Friday in 20:00
+			services.AddSingleton(new JobSchedule(typeof(XurLeave), config.XurLeave)); // run every Tuesday in 20:00
 
 			services.AddSingleton(new JobSchedule(typeof(MilestoneRemind), "0/10 * * * * ?")); // run every 10 seconds.
 		}

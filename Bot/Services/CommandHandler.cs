@@ -9,6 +9,8 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Vex.Properties;
 
 namespace Bot.Services
 {
@@ -18,15 +20,15 @@ namespace Bot.Services
 	internal class CommandHandler
 	{
 		private readonly IServiceProvider _service;
+		private readonly IConfiguration _config;
 		private readonly DiscordSocketClient _discord;
 		private CommandService _command;
-		private readonly BotConfig _config;
-		public CommandHandler(IServiceProvider service)
+
+		public CommandHandler(IServiceProvider service, IConfiguration config, DiscordSocketClient discord)
 		{
 			_service = service;
-			_discord = service.GetRequiredService<DiscordSocketClient>();
-			_command = service.GetRequiredService<CommandService>();
-			_config = service.GetRequiredService<IOptions<BotConfig>>().Value;
+			_config = config;
+			_discord = discord;
 		}
 
 		internal async Task ConfigureAsync()
@@ -48,7 +50,7 @@ namespace Bot.Services
 
 			var argPos = 0;
 			// ignore if command not start from prefix
-			if (!msg.HasStringPrefix(_config.Prefix, ref argPos)) return;
+			if (!msg.HasStringPrefix(_config["Bot:Prefix"], ref argPos) || !msg.HasMentionPrefix(_discord.CurrentUser, ref argPos)) return;
 
 			// search command
 			var cmdSearchResult = _command.Search(context, argPos);
@@ -62,7 +64,8 @@ namespace Bot.Services
 				// if Success or command unknown just finish Task
 				if (task.Result.IsSuccess || task.Result.Error == CommandError.UnknownCommand) return;
 
-				context.Channel.SendMessageAsync($"{context.User.Mention} Ошибка: {task.Result.ErrorReason}");
+				var errorText = $"{context.User.Mention}, {Resources.ErrorHandleCommand} {task.Result.ErrorReason}";
+				context.Channel.SendMessageAsync(errorText);
 			});
 		}
 	}

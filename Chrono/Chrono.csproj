@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Neiralink\Neiralink.csproj" />
+    <ProjectReference Include="..\Vex\Vex.csproj" />
   </ItemGroup>
 
 </Project>

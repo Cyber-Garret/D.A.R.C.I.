@@ -1,32 +1,46 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
+
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.Extensions.Logging;
+
+using Neiralink;
+
 using Quartz;
+
+using Vex;
 
 namespace Chrono.Jobs
 {
 	[DisallowConcurrentExecution]
 	public class XurLeave : IJob
 	{
-		private readonly ILogger _logger;
+		private readonly ILogger<XurLeave> _logger;
 		private readonly DiscordSocketClient _discord;
-		public XurLeave(IServiceProvider service)
+		private readonly IGuildConfig _guildConfig;
+
+		public XurLeave(ILogger<XurLeave> logger, DiscordSocketClient discord, IGuildConfig guildConfig)
 		{
-			_logger = service.GetRequiredService<ILogger<XurArrive>>();
-			_discord = service.GetRequiredService<DiscordSocketClient>();
+			_logger = logger;
+			_discord = discord;
+			_guildConfig = guildConfig;
 		}
+
 		public async Task Execute(IJobExecutionContext context)
 		{
 			try
 			{
-				if (GuildConfig.settings.NotificationChannel != 0)
-				{
-					var newsChannel = _discord.Guilds.FirstOrDefault().GetTextChannel(GuildConfig.settings.NotificationChannel);
-					await newsChannel.SendMessageAsync(GuildConfig.settings.GlobalMention, embed: Embeds.XurLeave());
-				}
+				//Get guild config
+				var guildConfig = await _guildConfig.GetGuildConfig();
+
+				//We have saved text channel?
+				if (guildConfig.NotificationChannelId == 0) return;
+
+				//Write tuesday message
+				await _discord.GetGuild(guildConfig.Id).GetTextChannel(guildConfig.NotificationChannelId)
+					.SendMessageAsync(embed: XurEmbeds.XurLeaveEmbed());
+
 			}
 			catch (Exception ex)
 			{

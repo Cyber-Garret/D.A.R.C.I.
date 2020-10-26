@@ -1,11 +1,15 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
+
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.Extensions.Logging;
+
 using Neiralink;
+
 using Quartz;
+
+using Vex;
 
 namespace Chrono.Jobs
 {
@@ -14,26 +18,29 @@ namespace Chrono.Jobs
 	{
 		private readonly ILogger<XurArrive> _logger;
 		private readonly DiscordSocketClient _discord;
-		private readonly NeiraDatabase _neira;
+		private readonly IGuildConfig _guildConfig;
 
-		public XurArrive(ILogger<XurArrive> logger, DiscordSocketClient discord, NeiraDatabase neira)
+		public XurArrive(ILogger<XurArrive> logger, DiscordSocketClient discord, IGuildConfig guildConfig)
 		{
 			_logger = logger;
 			_discord = discord;
-			_neira = neira;
+			_guildConfig = guildConfig;
 		}
 
 		public async Task Execute(IJobExecutionContext context)
 		{
 			try
 			{
-				var channel = _neira.Guilds.First().NotificationChannelId;
+				//Get guild config
+				var guildConfig = await _guildConfig.GetGuildConfig();
 
-				if (GuildConfig.settings.NotificationChannel != 0)
-				{
-					var newsChannel = _discord.Guilds.FirstOrDefault().GetTextChannel(GuildConfig.settings.NotificationChannel);
-					await newsChannel.SendMessageAsync(GuildConfig.settings.GlobalMention, embed: Embeds.XurArrive());
-				}
+				//We have saved text channel?
+				if (guildConfig.NotificationChannelId == 0) return;
+
+				//Write friday message
+				await _discord.GetGuild(guildConfig.Id).GetTextChannel(guildConfig.NotificationChannelId)
+					.SendMessageAsync(embed: XurEmbeds.XurArriveEmbed());
+
 			}
 			catch (Exception ex)
 			{

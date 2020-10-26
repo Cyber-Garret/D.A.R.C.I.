@@ -4,12 +4,14 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
+using Vex.Properties;
+
 namespace Bot.Preconditions
 {
 	public sealed class Cooldown : PreconditionAttribute
 	{
-		TimeSpan CooldownLength { get; set; }
-		readonly ConcurrentDictionary<CooldownInfo, DateTime> _cooldowns = new ConcurrentDictionary<CooldownInfo, DateTime>();
+		private TimeSpan CooldownLength { get; }
+		private readonly ConcurrentDictionary<CooldownInfo, DateTime> _cooldowns = new ConcurrentDictionary<CooldownInfo, DateTime>();
 
 		/// <summary>
 		/// Add cooldown for command.
@@ -24,13 +26,13 @@ namespace Bot.Preconditions
 		{
 			var key = new CooldownInfo(context.User.Id, command.GetHashCode());
 			// Check if user command cooldown now?
-			if (_cooldowns.TryGetValue(key, out DateTime endsAt))
+			if (_cooldowns.TryGetValue(key, out var endsAt))
 			{
 				var difference = endsAt.Subtract(DateTime.UtcNow);
 				// if command in cooldown.
 				if (difference.Ticks > 0)
 				{
-					return Task.FromResult(PreconditionResult.FromError($"You can use this command again after {difference:%s} sec."));
+					return Task.FromResult(PreconditionResult.FromError(string.Format(Resources.CooldownMessage, difference.Seconds)));
 				}
 				// update time
 				var time = DateTime.UtcNow.Add(CooldownLength);
@@ -43,10 +45,11 @@ namespace Bot.Preconditions
 
 			return Task.FromResult(PreconditionResult.FromSuccess());
 		}
-		internal struct CooldownInfo
+
+		private readonly struct CooldownInfo
 		{
-			public ulong UserId { get; }
-			public int CommandHashCode { get; }
+			private ulong UserId { get; }
+			private int CommandHashCode { get; }
 
 			public CooldownInfo(ulong userId, int commandHashCode)
 			{

@@ -12,6 +12,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="resources\backgrounds\**" />
+    <Compile Remove="resources\raids\**" />
+    <Compile Remove="resources\strikes\**" />
+    <Content Remove="resources\backgrounds\**" />
+    <Content Remove="resources\raids\**" />
+    <Content Remove="resources\strikes\**" />
+    <EmbeddedResource Remove="resources\backgrounds\**" />
+    <EmbeddedResource Remove="resources\raids\**" />
+    <EmbeddedResource Remove="resources\strikes\**" />
+    <None Remove="resources\backgrounds\**" />
+    <None Remove="resources\raids\**" />
+    <None Remove="resources\strikes\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Discord.Addons.PassiveInteractive" Version="2.0.4" />
     <PackageReference Include="Discord.Net.Commands" Version="2.2.0" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.2.0" />
@@ -19,13 +34,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="resources\backgrounds\" />
-    <Folder Include="resources\strikes\" />
-    <Folder Include="resources\raids\" />
+    <ProjectReference Include="..\Chrono\Chrono.csproj" />
+    <ProjectReference Include="..\Neiralink\Neiralink.csproj" />
+    <ProjectReference Include="..\Vex\Vex.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Chrono\Chrono.csproj" />
-    <ProjectReference Include="..\Neiralink\Neiralink.csproj" />
+    <Folder Include="resources\" />
   </ItemGroup>
 </Project>
