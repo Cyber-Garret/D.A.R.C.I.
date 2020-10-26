@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Neiralink
+﻿namespace Neiralink
 {
 	public class NeiralinkConfiguration
 	{
@@ -10,5 +6,10 @@ namespace Neiralink
 		/// appsettings.json section name
 		/// </summary>
 		public const string Neiralink = "Neiralink";
+
+		/// <summary>
+		/// Home discord guild id
+		/// </summary>
+		public ulong GuildId { get; set; }
 	}
 }

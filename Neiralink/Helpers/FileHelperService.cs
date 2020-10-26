@@ -1,20 +1,20 @@
-﻿using Bot.Core;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using Newtonsoft.Json;
 
-namespace Bot
+using System;
+using System.IO;
+
+namespace Neiralink.Helpers
 {
-	internal class DataStorage
+	internal class FileHelperService
 	{
-		static DataStorage()
+		private const string RootFolderName = "resources";
+
+		public FileHelperService()
 		{
-			if (!Directory.Exists(Constants.ResourceFolder))
-			{
-				Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), Constants.ResourceFolder));
-			}
+			var rootPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty, RootFolderName);
+
+			if (!Directory.Exists(rootPath))
+				Directory.CreateDirectory(rootPath);
 		}
 
 		internal static void StoreObject(object obj, string filePath, bool useIndentations)
@@ -29,6 +29,7 @@ namespace Bot
 			var json = GetOrCreateFileContents(filePath);
 			return JsonConvert.DeserializeObject<T>(json);
 		}
+
 		internal static void RemoveObject(string filePath)
 		{
 			if (File.Exists(filePath))
@@ -37,12 +38,9 @@ namespace Bot
 
 		private static string GetOrCreateFileContents(string filePath)
 		{
-			if (!File.Exists(filePath))
-			{
-				File.WriteAllText(filePath, "");
-				return "";
-			}
-			return File.ReadAllText(filePath);
+			if (File.Exists(filePath)) return File.ReadAllText(filePath);
+			File.WriteAllText(filePath, "");
+			return "";
 		}
 	}
 }
